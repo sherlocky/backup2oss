@@ -1,0 +1,2 @@
+## auto backup db
+0 3 * * * /opt/bin/backup_db.sh
