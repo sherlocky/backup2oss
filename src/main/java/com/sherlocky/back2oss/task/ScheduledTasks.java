@@ -1,26 +1,37 @@
 package com.sherlocky.back2oss.task;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
+import com.alibaba.fastjson.JSON;
+import com.sherlocky.back2oss.service.BackupService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.sherlocky.back2oss.service.BackupService;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
+@Slf4j
 @Component
 public class ScheduledTasks {
-	@Autowired 
+	@Autowired
 	private BackupService backupService;
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
-	@Scheduled(cron = "0 30 3 * * ?") // prod 每天3点半执行
+	@Scheduled(cron = "0 30 3 * * ?") // prod 每天凌晨3点半执行
     // @Scheduled(cron="0 0/1 * * * ?") // dev时每分钟触发一次
-    public void reportCurrentTime() {
-        System.out.println("### 备份文件开始：当前时间：" + dateFormat.format(new Date()));
+    public void taskBackup() {
+	    log.info("### 备份文件开始：当前时间：" + dateFormat.format(new Date()));
         backupService.backup();
-        System.out.println("### 备份文件结束：" + dateFormat.format(new Date()));
+        log.info("### 备份文件结束：" + dateFormat.format(new Date()));
+    }
+
+    // 每月1号凌晨3点40执行（删除任务晚于备份任务）
+    @Scheduled(cron = "0 40 3 1 * ?")
+    public void taskClearOlds() {
+        log.info("### 清理上月过期备份文件开始：当前时间：" + dateFormat.format(new Date()));
+        String[] needDeleteFiles = backupService.deleteLastMonthOldFiles();
+        log.info(JSON.toJSONString(needDeleteFiles));
+        log.info("### 清理上月过期备份文件结束：" + dateFormat.format(new Date()));
     }
     
 /*	@Scheduled(fixedRate = 1000 * 3)
