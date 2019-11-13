@@ -17,6 +17,9 @@ public class ScheduledTasks {
 	private BackupService backupService;
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
+    /**
+     * 如果需要并行执行任务，使用 @Async 注解，并且在主方法上使用 @EnableAsync 注解。
+     */	
 	@Scheduled(cron = "0 30 3 * * ?") // prod 每天凌晨3点半执行
     // @Scheduled(cron="0 0/1 * * * ?") // dev时每分钟触发一次
     public void taskBackup() {
